@@ -1,6 +1,5 @@
 Configuration,Data Type,Accuracy,Macro F1,Delta Accuracy,Delta Macro F1,Train Time (s),Inference Time (s),Latency (ms/sample)
-No Early Stopping,standardized,0.8959,0.8963,0.0035,0.004,171.4,0.0617,0.006174
-Lower Learning Rate,standardized,0.8944,0.8942,0.002,0.002,62.92,0.0701,0.00701
-Smaller Network,standardized,0.8935,0.8929,0.0011,0.0006,96.81,0.3671,0.036713
-Baseline,standardized,0.8924,0.8922,0.0,0.0,112.19,0.212,0.0212
-No Standardization,normalized_only,0.8921,0.8917,-0.0003,-0.0005,117.05,0.1789,0.017893
+No Early Stopping,standardized,0.8959,0.8963,0.0035,0.004,190.57,0.1649,0.016493
+Baseline,standardized,0.8924,0.8922,0.0,0.0,64.67,0.0918,0.009183
+No Standardization,normalized_only,0.8921,0.8917,-0.0003,-0.0005,124.7,0.4843,0.048428
+No Hidden Layer,standardized,0.8506,0.8494,-0.0418,-0.0429,5.63,0.0264,0.002644
