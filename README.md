@@ -12,7 +12,7 @@ This project explores various machine learning models (k-NN, SVM, Random Forest,
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Data & Model Setup
 
@@ -22,7 +22,7 @@ To run the evaluation or ablation notebooks without retraining, please download 
 [https://drive.google.com/drive/folders/1KbSx2WL4_74ZZMJ-MSRK9vY-CMX1eqev?usp=sharing]
 
 1.  Download the `data` and `models` folders.
-2.  Place both folders directly into the **root folder** (`Group 2/`) of this project.
+2.  Place both folders directly into the **root folder** (`src/`) of this project.
 3.  If you wish to re-run the pipeline from scratch:
     - Place the raw `fashion-mnist_train.csv` and `fashion-mnist_test.csv` into the `data/` folder.
     - Run `preprocessing/preprocessing.ipynb` to generate the `.npz` file.
@@ -32,7 +32,7 @@ To run the evaluation or ablation notebooks without retraining, please download 
 ## 📂 Project Structure
 
 ```text
-Group 2/
+src/
 ├── ablation/
 │   └── ablation_mlp.ipynb          # MLP component analysis
 ├── EDA/
@@ -58,50 +58,53 @@ Group 2/
 
 ---
 
-## 📝 Project Sections
+## 1. Data Description
+Fashion-MNIST is a dataset consisting of Zalando’s article images. It serves as a direct drop-in replacement for the original MNIST dataset for benchmarking machine learning algorithms.
+*   **Total Samples:** 70,000.
+*   **Image Dimensions:** 28x28 pixels (Grayscale).
+*   **Feature Count:** 784 (Flattened).
+*   **Classes:** 10 categories (T-shirt/top, Trouser, Pullover, Dress, Coat, Sandal, Shirt, Sneaker, Bag, Ankle boot).
 
-### 1. Data Description
+## 2. Exploratory Data Analysis (EDA)
+During the EDA phase, we observed the following:
+*   **Class Balance:** The dataset is perfectly balanced, with each class containing exactly 7,000 images.
+*   **Pixel Intensity:** The raw data ranges from 0 to 255. Most pixels are 0 (background), creating a bimodal distribution where the second peak represents the foreground object.
+*   **Visual Similarity:** High overlap exists between "Shirt," "T-shirt," and "Coat," which suggests linear models might struggle to find clear boundaries.
 
-Fashion-MNIST is a dataset of Zalando's article images—consisting of a training set of 60,000 examples and a test set of 10,000 examples. Each example is a 28x28 grayscale image, associated with a label from 10 classes: T-shirt/top, Trouser, Pullover, Dress, Coat, Sandal, Shirt, Sneaker, Bag, and Ankle boot.
+## 3. Data Preprocessing & Experimental Setup
 
-### 2. EDA (Exploratory Data Analysis)
+### 3.1 Experimental Setup
+To ensure reproducibility, all benchmarks were executed under the following environment:
+*   **Processor:** AMD Ryzen 5 7535HS (6 Cores, 12 Threads).
+*   **Memory:** 16GB DDR5 RAM.
+*   **Graphics:** NVIDIA GeForce RTX 4050 Laptop GPU.
+*   **Software Stack:** Python 3.11, Scikit-learn, NumPy, Pandas, Matplotlib.
+*   **Random Seed:** 42.
 
-_[Section to be completed by team member]_
+### 3.2 Preprocessing Pipeline
+1.  **Normalization:** Pixel values were divided by 255 to scale them to the $[0, 1]$ range.
+2.  **Standardization:** Applied Z-score standardization ($z = \frac{x - \mu}{\sigma}$) using `StandardScaler` to center the data at mean 0 and unit variance.
+3.  **Data Partitioning:** We performed a **stratified split** to ensure subsets were representative:
+    *   **Training Set:** 50,000 samples.
+    *   **Validation Set:** 10,000 samples.
+    *   **Test Set:** 10,000 samples.
+4.  **Storage:** Finalized arrays were saved as a compressed `.npz` file for shared access.
 
-### 3. Preprocessing
+## 4. Classification Models: Idea and Implementation
 
-- **Normalization:** Pixel values were scaled to the [0, 1] range.
-- **Standardization:** Applied Z-score standardization (StandardScaler) to center data (mean=0, std=1), which is crucial for distance-based models (KNN) and gradient-based models (MLP).
-- **Data Partitioning:** Employed a stratified split to ensure class balance across subsets:
-  - **Training:** 50,000 samples.
-  - **Validation:** 10,000 samples.
-  - **Test:** 10,000 samples.
-- **Storage:** Exported data to `fashion_data_complete.npz` for consistent cross-model training.
+### 4.1 k-Nearest Neighbors (k-NN)
+We performed a grid search on $k$ values and distance metrics. While Manhattan distance ($p=1$) was slightly more accurate, Euclidean distance ($p=2$) was significantly faster. We selected $k=5$ and $p=2$ with distance-based weighting for our final implementation.
 
-### 4. Model Implementation & Tuning
+### 4.2 Support Vector Machine (SVM)
+We compared Linear and RBF kernels. The **RBF kernel** significantly outperformed the Linear kernel, achieving the highest overall accuracy. We used $C=15$ and enabled probability estimates for ROC-AUC analysis.
 
-#### Support Vector Machine (SVM)
+### 4.3 Random Forest
+An ensemble model using 200 trees. It demonstrated high stability and was the most memory-efficient model during inference, showing a negligible memory spike compared to the others.
 
-- **Tuning:** Compared Linear vs. RBF kernels. RBF significantly outperformed Linear in high-dimensional space.
-- **Optimization:** Identified $C=15$ as the optimal regularization parameter.
-- **Result:** Highest overall accuracy (~90.06%).
+### 4.4 Multi-layer Perceptron (MLP)
+We implemented a feed-forward neural network with a (256, 128) hidden layer architecture. It utilized ReLU activation and the Adam optimizer. This model provided the best trade-off between high accuracy and real-time inference speed.
 
-#### k-Nearest Neighbors (KNN)
-
-- **Tuning:** Tested $k$ values {1, 3, 5, 7, 11, 15} and distance metrics (Manhattan vs. Euclidean).
-- **Optimization:** Selected $k=5$, $p=2$ (Euclidean) with distance-based weighting.
-- **Trade-off:** While Manhattan ($p=1$) was slightly more accurate, Euclidean ($p=2$) was 10x faster, making it more practical for the full 60,000 sample dataset.
-
-#### Random Forest (RF)
-
-_[Section to be completed by team member]_
-
-#### Multi-Layer Perceptron (MLP)
-
-_[Section to be completed by team member]_
-
-### 5. Evaluation
-
+## 5. Evaluation
 The models were evaluated based on three main pillars:
 
 1.  **Predictive Power:** SVM achieved the best Accuracy (0.90) and Macro F1-score (0.90).
@@ -109,18 +112,13 @@ The models were evaluated based on three main pillars:
 3.  **Resource Usage:** Random Forest was the most memory-stable, while SVM and k-NN showed significant memory spikes.
 4.  **Final Decision:** MLP model as it was fast and accurate enough with controllable memory usage.
 
-### 6. Ablation Study
+## 6. Ablation Study
+We conducted an ablation study on the MLP model to identify the impact of specific components on performance:
+*   **No Standardization:** Accuracy dropped slightly, proving that centering the data helps the optimizer converge faster.
+*   **No Early Stopping:** Allowed the model to reach a slightly higher accuracy but at the cost of significantly longer training time and potential overfitting.
+*   **No Hidden Layer:** Reducing the MLP to a single-layer perceptron (Linear) caused the most significant drop in accuracy (~4%), proving that non-linear hidden representations are essential for this dataset.
 
-Focuses on the MLP model to determine the impact of:
-
-- Standardization.
-- Early Stopping.
-- Hidden Layer architecture.
-
-_[Section to be completed by team member]_
-
-### 7. Results & Conclusion
-
-- **Best for Accuracy:** SVM is the top performer but comes with high computational costs.
-- **Best for Production:** MLP offers the best balance, providing high accuracy with near-instantaneous inference speed.
-- **Challenging Classes:** All models struggle with the "Shirt" class due to its visual similarity to "T-shirt" and "Coat" at low resolutions.
+## 7. Conclusions and Insights
+*   **Performance:** Non-linear models (SVM-RBF and MLP) are necessary for Fashion-MNIST; linear boundaries are insufficient for distinguishing complex clothing textures.
+*   **Practicality:** While SVM is slightly more accurate, the MLP is preferred for production deployment because it is thousands of times faster during inference.
+*   **Bottleneck:** All models share the same bottleneck: the "Shirt" class. Improvement in future work should focus on feature extraction methods (like CNNs) to capture collar and button details.
